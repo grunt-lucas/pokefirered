@@ -37,6 +37,8 @@
 #include "constants/battle_move_effects.h"
 #include "constants/union_room.h"
 
+#include "gba/isagbprint.h"
+
 #define SPECIES_TO_HOENN(name)      [SPECIES_##name - 1] = HOENN_DEX_##name
 #define SPECIES_TO_NATIONAL(name)   [SPECIES_##name - 1] = NATIONAL_DEX_##name
 #define HOENN_TO_NATIONAL(name)     [HOENN_DEX_##name - 1] = NATIONAL_DEX_##name
@@ -6438,4 +6440,64 @@ u8 *MonSpritesGfxManager_GetSpritePtr(u8 spriteNum)
             spriteNum = 0;
         return sMonSpritesGfxManager->spritePointers[spriteNum];
     }
+}
+
+void UpdateMonPersonality(struct BoxPokemon *boxMon, u32 personality) {
+    struct PokemonSubstruct0 *old0, *new0;
+    struct PokemonSubstruct1 *old1, *new1;
+    struct PokemonSubstruct2 *old2, *new2;
+    struct PokemonSubstruct3 *old3, *new3;
+    struct BoxPokemon old;
+
+    old = *boxMon;
+    old0 = &(GetSubstruct(&old, old.personality, 0)->type0);
+    old1 = &(GetSubstruct(&old, old.personality, 1)->type1);
+    old2 = &(GetSubstruct(&old, old.personality, 2)->type2);
+    old3 = &(GetSubstruct(&old, old.personality, 3)->type3);
+
+    new0 = &(GetSubstruct(boxMon, personality, 0)->type0);
+    new1 = &(GetSubstruct(boxMon, personality, 1)->type1);
+    new2 = &(GetSubstruct(boxMon, personality, 2)->type2);
+    new3 = &(GetSubstruct(boxMon, personality, 3)->type3);
+
+    DecryptBoxMon(&old);
+    boxMon->personality = personality;
+    *new0 = *old0;
+    *new1 = *old1;
+    *new2 = *old2;
+    *new3 = *old3;
+    boxMon->checksum = CalculateBoxMonChecksum(boxMon);
+    EncryptBoxMon(boxMon);
+}
+
+void MakeMonShiny(void) {
+    u32 newPersonality = 0;
+    struct Pokemon *pokemon = &gPlayerParty[gSpecialVar_0x8004];
+    u8 originalNature = GetNatureFromPersonality(pokemon->box.personality);
+    u8 originalGender = GetMonGender(pokemon);
+    u32 species = GetBoxMonData(&pokemon->box, MON_DATA_SPECIES, NULL);
+
+    while (1) {
+        if (newPersonality % 1000000 == 0) {
+            MgbaPrintf(MGBA_LOG_WARN, "Trying personality value: %d\n", newPersonality);
+        }
+
+        // If new personality is not shiny, short-circuit and continue
+        if (!IsShinyOtIdPersonality(pokemon->box.otId, newPersonality)) {
+            newPersonality++;
+            continue;
+        }
+
+        // We found a shiny, now check if gender matches up and nature is as desired
+        // if (GetNatureFromPersonality(newPersonality) == NATURE_QUIET &&
+        if (GetNatureFromPersonality(newPersonality) == originalNature &&
+            GetGenderFromSpeciesAndPersonality(species, newPersonality) == originalGender) {
+            break;
+        }
+
+        newPersonality++;
+    }
+
+    MgbaPrintf(MGBA_LOG_WARN, "Found shiny personality value: %d\n", newPersonality);
+    UpdateMonPersonality(&pokemon->box, newPersonality);
 }

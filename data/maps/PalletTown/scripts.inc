@@ -450,3 +450,36 @@ PalletTown_EventScript_SignLadyStartShowSign::
 	call PalletTown_EventScript_SignLadyShowSign
 	release
 	end
+
+PalletTown_EventScript_ShinyGuy::
+	lockall
+	faceplayer
+	msgbox PalletTown_Text_ShinyGuyWantShiny, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, PalletTown_EventScript_ChooseMon
+	goto_if_eq VAR_RESULT, NO, PalletTown_EventScript_DontMakeShiny
+	end
+
+PalletTown_EventScript_ChooseMon::
+	msgbox PalletTown_Text_WhichMonWantShiny
+	special ChoosePartyMon
+	waitstate
+	goto_if_lt VAR_0x8004, PARTY_SIZE, PalletTown_EventScript_ShinyMonIfPossible
+	goto_if_ge VAR_0x8004, PARTY_SIZE, PalletTown_EventScript_DontMakeShiny
+	end
+
+PalletTown_EventScript_ShinyMonIfPossible::
+	specialvar VAR_RESULT, GetPartyMonSpecies
+	goto_if_eq VAR_RESULT, SPECIES_EGG, PalletTown_EventScript_CantNicknameEgg
+	special MakeMonShiny
+	releaseall
+	end
+
+PalletTown_EventScript_CantNicknameEgg::
+	msgbox LavenderTown_House2_Text_ThatIsMerelyAnEgg MSGBOX_NPC
+	releaseall
+	end
+
+PalletTown_EventScript_DontMakeShiny::
+	msgbox PalletTown_Text_ISeeComeVisitAgain
+	releaseall
+	end

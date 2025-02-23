@@ -424,5 +424,7 @@ bool8 CheckBattleTypeGhost(struct Pokemon *mon, u8 bank);
 struct MonSpritesGfxManager *CreateMonSpritesGfxManager(u8 battlePosition, u8 mode);
 void DestroyMonSpritesGfxManager(void);
 u8 *MonSpritesGfxManager_GetSpritePtr(u8 bufferId);
+void UpdateMonPersonality(struct BoxPokemon *boxMon, u32 personality);
+void MakeMonShiny(void);
 
 #endif // GUARD_POKEMON_H

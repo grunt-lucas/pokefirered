@@ -65,3 +65,14 @@ PalletTown_Text_OakYouEnjoyingTraveling::
     .string "Good for you, good for you.\n"
     .string "Hohoho.$"
 
+PalletTown_Text_ShinyGuyWantShiny::
+    .string "Hello! Would you like me to make\n"
+    .string "one of your POKéMON shiny?$"
+
+PalletTown_Text_WhichMonWantShiny::
+    .string "Which POKéMON should I make\n"
+    .string "shiny?$"
+
+PalletTown_Text_ISeeComeVisitAgain::
+    .string "I see.\n"
+    .string "Do come see me again.$"
